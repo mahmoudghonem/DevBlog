@@ -1,0 +1,23 @@
+{
+  "name": "devblog",
+  "version": "1.0.0",
+  "description": "This is Developers Blog",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devstart": "nodemon index.js"
+  },
+  "author": "Dev Mahmoud Ghonem",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.12"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}

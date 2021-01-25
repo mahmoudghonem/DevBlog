@@ -31,7 +31,7 @@ async function getById(req, res) {
     const { id } = req.params;
     const article = await Article.findById(id);
     const reads = article.reads + 1;
-    return await Article.updateOne({ _id: id }, { $set: { reads: reads } }, { new: true }, (err, doc) => {
+    return await Article.findByIdAndUpdate({ _id: id }, { $set: { reads: reads } }, { new: true }, (err, doc) => {
         if (err) {
             res.send(err);
         } else {

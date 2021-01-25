@@ -18,8 +18,6 @@ app.get('*', (req, res,next) => {
 //error handler middleware
 app.use((err, req, res, next) => {
     errorHandler(err,req,res,next);
-    res.status(503).end();
-
 })
 
 app.listen(PORT, () => {

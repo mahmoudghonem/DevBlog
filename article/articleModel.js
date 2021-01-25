@@ -18,9 +18,10 @@ const ArticleModel = new Schema({
     },
     updatedAt: Date,
     likes: [String],
-    comments: {
-        type: [String]
-    },
+    comments: [{
+        id: String,
+        comment: String
+    }],
     reads: {
         type: Number,
         default: 0

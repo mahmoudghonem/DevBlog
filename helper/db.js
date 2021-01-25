@@ -7,10 +7,10 @@ const connectionOptions = {
     useUnifiedTopology: true,
     useFindAndModify: false
 };
-
-mongoose.connect(process.env.MONGO_URL, connectionOptions).then(() => 
-console.log("Database Connected Successfully"))
-.catch(err => console.log(err));
+const { MONGO_URL } = process.env;
+mongoose.connect(MONGO_URL, connectionOptions).then(() =>
+    console.log("Database Connected Successfully"))
+    .catch(err => console.log(err));
 mongoose.Promise = global.Promise;
 
 module.exports = {

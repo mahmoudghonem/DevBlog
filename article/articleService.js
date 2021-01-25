@@ -27,8 +27,19 @@ async function getFollowArticles(req, res) {
     const followingUID = user.following;
     return await Article.find('userId').where('_id').in(followingUID).exec();
 }
-async function getById(id) {
-    return await Article.findById(id);
+async function getById(req, res) {
+    const { id } = req.params;
+    const article = await Article.findById(id);
+    const reads = article.reads + 1;
+    return await Article.updateOne({ _id: id }, { $set: { reads: reads } }, { new: true }, (err, doc) => {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send(doc);
+        }
+
+    });
+
 }
 async function editbyId(id, body) {
     await Article.findByIdAndUpdate(id, body, { new: true })
@@ -48,11 +59,11 @@ async function deletbyId(req, res) {
         });
 }
 async function searchByTitle(title) {
-    Article.find(title).exec()
+    return await Article.find(title).exec()
 }
 
 async function searchByTag(tag) {
-    Article.find(tag).exec();
+    return await Article.find(tag).exec();
 }
 async function doLike(req, res) {
     const { user } = req;
@@ -75,9 +86,8 @@ async function unLike(req, res) {
     const { user } = req;
     const { params: { id } } = req;
 
-    const getUser = await User.findById(user._id);
 
-    await Article.updateOne({ _id: id }, { $pull: { likes: getUser._id } },
+    await Article.updateOne({ _id: id }, { $pull: { likes: user._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -85,7 +95,21 @@ async function unLike(req, res) {
                 res.send(result);
             }
         });
-
+    return;
+}
+async function comment(req, res) {
+    const { user } = req;
+    const { params: { id } } = req;
+    const { body: { comment } } = req;
+    const userId = user._id;
+    await Article.updateOne({ _id: id }, { $addToSet: { comments: { userId, comment } } },
+        function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send(result);
+            }
+        });
     return;
 }
 module.exports = {
@@ -98,5 +122,6 @@ module.exports = {
     searchByTag,
     doLike,
     unLike,
+    comment,
     getFollowArticles
 }

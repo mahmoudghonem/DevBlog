@@ -34,10 +34,8 @@ async function getById(req, res) {
     return await Article.findByIdAndUpdate({ _id: id }, { $set: { reads: reads } }, { new: true }, (err, doc) => {
         if (err) {
             res.send(err);
-        } else {
-            res.send(doc);
         }
-
+        return;
     });
 
 }
@@ -102,15 +100,14 @@ async function comment(req, res) {
     const { params: { id } } = req;
     const { body: { comment } } = req;
     const userId = user._id;
-    await Article.updateOne({ _id: id }, { $addToSet: { comments: { userId, comment } } },
+    return await Article.updateOne({ _id: id }, { $addToSet: { comments: { userId, comment } } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
+            return;
         });
-    return;
+    
 }
 module.exports = {
     create,

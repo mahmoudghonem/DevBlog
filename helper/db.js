@@ -8,7 +8,9 @@ const connectionOptions = {
     useFindAndModify: false
 };
 
-mongoose.connect(process.env.MONGO_URL, connectionOptions);
+mongoose.connect(process.env.MONGO_URL, connectionOptions).then(() => 
+console.log("Database Connected Successfully"))
+.catch(err => console.log(err));
 mongoose.Promise = global.Promise;
 
 module.exports = {

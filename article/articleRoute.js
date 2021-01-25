@@ -23,7 +23,7 @@ function getAll(req, res, next) {
 }
 function createArticle(req, res, next) {
     articleService.create(req, res)
-        .then(article => res.json({ message: "CREATED" }))
+        .then(article => res.json(article))
         .catch(err => next(err));
 }
 

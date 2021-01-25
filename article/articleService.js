@@ -1,24 +1,51 @@
 const db = require('../helper/db');
+const multer = require('multer');
+const { imageFilter } = require('../helper/imageHandler');
+const path = require('path');
 const Article = db.Article;
 const User = db.User;
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads');
+    },
+
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
 
 async function create(req, res) {
     const { body, user } = req
     const getUser = await User.findById(user._id);
-    let aId;
-    await Article.create({ ...body, userId: user._id }).then((a) => {
-        aId = a._id;
+    let upload = multer({ storage: storage, fileFilter: imageFilter }).single('photo');
+    upload(req, res, function (err) {
+        // if (req.fileValidationError) {
+        //  res.send(req.fileValidationError);
+        // }
+        // else if (err instanceof multer.MulterError) {
+        //  res.send(err);
+        // }
+        // else if (err) {
+        //  res.send(err);
+        // }
+        if (req.file != undefined)
+            body.photo = req.file.path;
     });
-    await User.updateOne({ username: getUser.username }, { $addToSet: { articles: aId } },
+
+    const article = await Article.create({ ...body, userId: getUser._id }).then((a) => {
+        return a;
+    });
+    await User.updateOne({ username: getUser.username }, { $addToSet: { articles: article._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
         });
-    return;
+    return article;
+
 }
+
 async function getAll() {
     return await Article.find();
 }
@@ -35,19 +62,19 @@ async function getById(req, res) {
         if (err) {
             res.send(err);
         }
-        return;
     });
 
 }
 async function editbyId(id, body) {
-    await Article.findByIdAndUpdate(id, body, { new: true })
+    return await Article.findByIdAndUpdate(id, body, { new: true })
 }
 async function deletbyId(req, res) {
     const { params: { id } } = req;
     const aId = id;
     const { user } = req;
+    const getUser = await User.findById(user._id);
     await Article.findByIdAndDelete(aId).exec();
-    await User.updateOne({ username: user.username }, { $pull: { articles: aId } },
+    await User.updateOne({ username: getUser.username }, { $pull: { articles: aId } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -68,46 +95,39 @@ async function doLike(req, res) {
     const { params: { id } } = req;
 
     const getUser = await User.findById(user._id);
+    const userId = getUser._id;
 
-    await Article.updateOne({ _id: id }, { $addToSet: { likes: getUser._id } },
+    return await Article.updateOne({ _id: id }, { $addToSet: { likes: userId } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
         });
-
-    return;
 }
 async function unLike(req, res) {
     const { user } = req;
     const { params: { id } } = req;
-
-
-    await Article.updateOne({ _id: id }, { $pull: { likes: user._id } },
+    const getUser = await User.findById(user._id);
+    const userId = getUser._id;
+    return await Article.updateOne({ _id: id }, { $pull: { likes: userId } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
         });
-    return;
 }
 async function comment(req, res) {
     const { user } = req;
     const { params: { id } } = req;
     const { body: { comment } } = req;
-    const userId = user._id;
+    const getUser = await User.findById(user._id);
+    const userId = getUser._id;
     return await Article.updateOne({ _id: id }, { $addToSet: { comments: { userId, comment } } },
         function (err, result) {
             if (err) {
                 res.send(err);
             }
-            return;
         });
-    
 }
 module.exports = {
     create,

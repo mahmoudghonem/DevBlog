@@ -6,7 +6,7 @@ const jwtAuth = require('../helper/jwt')
 // routes
 router.post('/authenticate', login);
 router.post('/register', register);
-router.get('/', getAll);
+router.get('/', jwtAuth, getAll);
 router.get('/me', jwtAuth, getUser);
 router.get('/:id', getById);
 router.get('/following/:id', jwtAuth, getFollowing);

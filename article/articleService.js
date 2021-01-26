@@ -9,7 +9,9 @@ async function create(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    const article = await Article.create({ ...body, userId: getUser._id }).then((a) => {
+    const username = getUser.username;
+    const userId = getUser._id;
+    const article = await Article.create({ ...body, author: username, userId: userId }).then((a) => {
         return a;
     });
     await User.updateOne({ username: getUser.username }, { $addToSet: { articles: article._id } },
@@ -34,8 +36,18 @@ async function getFollowArticles(req, res) {
 
     return await Article.find('userId').where('_id').in(followingUID).exec();
 }
+async function getMyArticles(req, res) {
+    const { user } = req;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    const userArticles = getUser.articles;
+    return await Article.find({ '_id': userArticles }).exec();
+}
 async function saveArticle(req, res) {
     const { user } = req;
+    const { id } = req.params;
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
@@ -73,7 +85,7 @@ async function editbyId(req, res) {
     const { id } = req.params;
     const getUser = await User.findById(user._id);
     const article = Article.findById(id);
-    if (getUser._id != article.userId)
+    if (getUser._id != article.author.userId)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     return await Article.findByIdAndUpdate(id, body, { new: true })
@@ -83,7 +95,7 @@ async function deletbyId(req, res) {
     const { user } = req;
     const getUser = await User.findById(user._id);
     const article = Article.findById(id);
-    if (getUser._id != article.userId)
+    if (getUser._id != article.author.userId)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     await Article.findByIdAndDelete(id).exec();
@@ -96,13 +108,23 @@ async function deletbyId(req, res) {
 
         });
 }
-async function searchByTitle(title) {
-    return await Article.find(title).exec()
+
+async function searchBy(req, res) {
+    const { user } = req;
+    const { title, author, tags } = req.query;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    if (title) {
+        return await Article.find({ 'title':  { "$regex" : title}}).exec();
+    } else if (author) {
+        return await Article.find({ 'author': author }).exec();
+    } else if (tags) {
+        return await Article.find({ 'tags': tags }).exec();
+    }
 }
 
-async function searchByTag(tag) {
-    return await Article.find(tag).exec();
-}
 async function doLike(req, res) {
     const { user } = req;
     const { params: { id } } = req;
@@ -155,12 +177,12 @@ module.exports = {
     getById,
     editbyId,
     deletbyId,
-    searchByTitle,
-    searchByTag,
+    searchBy,
     doLike,
     unLike,
     comment,
     getSavedArticles,
     saveArticle,
-    getFollowArticles
+    getFollowArticles,
+    getMyArticles
 }

@@ -30,10 +30,14 @@ const ArticleModel = new Schema({
         type: Number,
         default: 0
     },
+    author: {
+        type: String
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users'
-    }
+    },
+
 });
 
 const articleModel = mongoose.model('Article', ArticleModel);

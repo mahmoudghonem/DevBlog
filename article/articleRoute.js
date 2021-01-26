@@ -4,10 +4,10 @@ const router = express.Router();
 const jwtAuth = require('../helper/jwt')
 // routes
 router.get('/', getAll);
+router.get('/myarticles', jwtAuth, getMyArticles);
 router.get('/followArticles', jwtAuth, getFollowingArticles);
 router.get('/savedArticles', jwtAuth, getSavedArticles);
-router.get('/search/:title', jwtAuth, searchByTitle);
-router.get('/search/:tag', jwtAuth, searchByTags);
+router.get('/search/', jwtAuth, searchBy);
 router.post('/create', jwtAuth, createArticle);
 router.get('/:id', getById);
 router.patch('/update/:id', jwtAuth, update);
@@ -23,6 +23,11 @@ function getAll(req, res, next) {
         .then(articles => res.json(articles))
         .catch(err => next(err));
 }
+function getMyArticles(req, res, next) {
+    articleService.getMyArticles(req, res)
+        .then(articles => res.json(articles))
+        .catch(err => next(err));
+}
 function createArticle(req, res, next) {
     articleService.create(req, res)
         .then(article => res.json(article))
@@ -34,13 +39,9 @@ function getById(req, res, next) {
         .then(article => article ? res.json(article) : res.sendStatus(404))
         .catch(err => next(err));
 }
-function searchByTitle(req, res, next) {
-    articleService.searchByTitle(req.params.title)
-        .then(article => article ? res.json(article) : res.sendStatus(404))
-        .catch(err => next(err));
-}
-function searchByTags(req, res, next) {
-    articleService.searchByTag(req.params.tag)
+
+function searchBy(req, res, next) {
+    articleService.searchBy(req, res)
         .then(article => article ? res.json(article) : res.sendStatus(404))
         .catch(err => next(err));
 }

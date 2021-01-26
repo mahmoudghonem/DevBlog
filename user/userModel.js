@@ -22,7 +22,7 @@ const UserModel = new Schema({
     },
     email: {
         type: String,
-        unique:true,
+        unique: true,
         required: true
     },
     password: {
@@ -36,7 +36,8 @@ const UserModel = new Schema({
     },
     following: [String],
     follower: [String],
-    articles: [String]
+    articles: [String],
+    savearticles: [String]
 }, {
     toJSON: {
         virtuals: true,

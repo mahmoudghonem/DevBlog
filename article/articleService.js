@@ -1,13 +1,14 @@
 const db = require('../helper/db');
 const multer = require('multer');
 const { imageFilter } = require('../helper/imageHandler');
+var fs = require('fs');
 const path = require('path');
 const Article = db.Article;
 const User = db.User;
 
 // const storage = multer.diskStorage({
 //     destination: function (req, file, cb) {
-//         cb(null, 'public/uploads');
+//         cb(null, 'uploads');
 //     },
 
 //     filename: function (req, file, cb) {
@@ -20,20 +21,18 @@ async function create(req, res) {
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
+
     // let upload = multer({ storage: storage, fileFilter: imageFilter }).single('photo');
     // upload(req, res, function (err) {
-    //     if (req.fileValidationError) {
-    //      res.send(req.fileValidationError);
+    //     if (req.file != undefined) {
+    //         let img = {
+    //             data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+    //             contentType: 'image/png'
+    //         };
+    //         body.photo = img;
     //     }
-    //     else if (err instanceof multer.MulterError) {
-    //      res.send(err);
-    //     }
-    //     else if (err) {
-    //      res.send(err);
-    //     }
-    //     if (req.file != undefined)
-    //         body.photo = req.file.path;
     // });
+
     const article = await Article.create({ ...body, userId: getUser._id }).then((a) => {
         return a;
     });
@@ -58,6 +57,29 @@ async function getFollowArticles(req, res) {
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     return await Article.find('userId').where('_id').in(followingUID).exec();
+}
+async function saveArticle(req, res) {
+    const { user } = req;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    const article = await Article.findById(id);
+    await User.updateOne({ username: getUser.username }, { $addToSet: { savearticles: article._id } },
+        function (err, result) {
+            if (err) {
+                res.send(err);
+            }
+        });
+}
+async function getSavedArticles(req, res) {
+    const { user } = req;
+    const savedUID = user.savearticles;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    return await Article.find('_id').where('_id').in(savedUID).exec();
 }
 async function getById(req, res) {
     const { id } = req.params;
@@ -162,5 +184,7 @@ module.exports = {
     doLike,
     unLike,
     comment,
+    getSavedArticles,
+    saveArticle,
     getFollowArticles
 }

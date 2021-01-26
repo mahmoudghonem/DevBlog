@@ -5,6 +5,7 @@ const jwtAuth = require('../helper/jwt')
 // routes
 router.get('/', getAll);
 router.get('/followArticles', jwtAuth, getFollowingArticles);
+router.get('/savedArticles', jwtAuth, getSavedArticles);
 router.get('/search/:title', jwtAuth, searchByTitle);
 router.get('/search/:tag', jwtAuth, searchByTags);
 router.post('/create', jwtAuth, createArticle);
@@ -13,6 +14,7 @@ router.patch('/update/:id', jwtAuth, update);
 router.patch('/like/:id', jwtAuth, like);
 router.patch('/dislike/:id', jwtAuth, dislike);
 router.patch('/comment/:id', jwtAuth, comment);
+router.patch('/saveArticle/:id', jwtAuth, saveArticle);
 router.delete('/delete/:id', jwtAuth, removeArticle);
 
 
@@ -61,6 +63,16 @@ function dislike(req, res, next) {
 function comment(req, res, next) {
     articleService.comment(req, res)
         .then((e) => res.json({ message: "COMMENTED" }))
+        .catch(err => next(err));
+}
+function saveArticle(req, res, next) {
+    articleService.saveArticle(req, res)
+        .then((e) => res.json({ message: "Saved" }))
+        .catch(err => next(err));
+}
+function getSavedArticles(req, res, next) {
+    articleService.getSavedArticles(req, res)
+        .then((articles) => res.json(articles))
         .catch(err => next(err));
 }
 function getFollowingArticles(req, res, next) {

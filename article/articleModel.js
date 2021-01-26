@@ -16,10 +16,10 @@ const ArticleModel = new Schema({
         type: Date,
         default: Date.now
     },
-    photo: {
-        type: String,
-        default:'/public/uploads/myimg.png'
-    },
+    // photo: {
+    //     data: Buffer,
+    //     contentType: String
+    // },
     updatedAt: Date,
     likes: [String],
     comments: [{

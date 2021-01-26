@@ -44,6 +44,15 @@ async function getAll() {
 async function getById(id) {
     return await User.findById(id);
 }
+async function getMe(req, res) {
+    const { user } = req;
+    const getUser = await User.findById(user._id);
+
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+
+    return await User.findById(user._id);
+}
 
 async function create(userParam) {
     // validate
@@ -125,26 +134,34 @@ async function unFollow(req, res) {
         });
     return res.sendStatus(200).json({ message: "UNFOLLOW" });
 }
-async function getFollowers(id) {
-    const { follower } = await getById(id)
-    return await User.find().where('_id').in(follower).exec();
-}
-async function getFollowing(id) {
-    const { following } = await getById(id)
-    return await User.find().where('_id').in(following).exec();
-}
-async function deleteUser(req, res) {
+async function getFollowers(req, res) {
     const { user } = req;
     const { params: { id } } = req;
     const getUser = await User.findById(user._id);
-
-    if (user._id != id)
+    if (!getUser)
         return res.sendStatus(403).send("UN_AUTHENTICATED");
+
+    const { follower } = await getById(id);
+    return await User.find({ '_id': follower }).exec();
+}
+async function getFollowing(req, res) {
+    const { user } = req;
+    const { params: { id } } = req;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+
+    const { following } = await getById(id)
+    return await User.find({ '_id': following }).exec();
+}
+async function deleteUser(req, res) {
+    const { user } = req;
+    const getUser = await User.findById(user._id);
 
     if (!getUser)
         return res.sendStatus(403).send("UN_AUTHENTICATED");
 
-    await User.findByIdAndRemove(id);
+    await User.findByIdAndRemove(user._id);
     return res.sendStatus(200).json({ message: "DELETED" });
 
 }
@@ -161,6 +178,7 @@ module.exports = {
     login,
     getAll,
     getById,
+    getMe,
     create,
     update,
     deleteUser,

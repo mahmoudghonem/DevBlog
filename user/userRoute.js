@@ -14,7 +14,7 @@ router.get('/followers/:id', jwtAuth, getFollowers);
 router.patch('/follow/:id', jwtAuth, follow);
 router.patch('/unfollow/:id', jwtAuth, unFollow);
 router.patch('/update/:id', jwtAuth, update);
-router.delete('/delete/:id', jwtAuth, removeUser);
+router.delete('/delete/', jwtAuth, removeUser);
 router.get('/logout', jwtAuth, logout);
 
 
@@ -38,7 +38,7 @@ function getAll(req, res, next) {
 }
 
 function getUser(req, res, next) {
-    userService.getById(req.user.id)
+    userService.getMe(req, res)
         .then(user => user ? res.json(user) : res.sendStatus(404))
         .catch(err => next(err));
 }
@@ -50,7 +50,7 @@ function getById(req, res, next) {
 }
 
 function update(req, res, next) {
-    userService.update(req,res)
+    userService.update(req, res)
         .then((e) => res.json(e))
         .catch(err => next(err));
 }
@@ -66,12 +66,12 @@ function logout(req, res, next) {
         .catch(err => next(err));
 }
 function getFollowers(req, res, next) {
-    userService.getFollowers(req.params.id)
+    userService.getFollowers(req, res)
         .then((e) => res.json(e))
         .catch(err => next(err));
 }
 function getFollowing(req, res, next) {
-    userService.getFollowing(req.params.id)
+    userService.getFollowing(req, res)
         .then((e) => res.json(e))
         .catch(err => next(err));
 }

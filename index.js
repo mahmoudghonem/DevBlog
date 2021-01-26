@@ -1,6 +1,6 @@
 require('dotenv').config()
 const express = require('express');
-const routes=require('./routes')
+const routes = require('./routes')
 const errorHandler = require('./helper/errorHandler');
 
 const app = express();
@@ -10,17 +10,16 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }))
 
-app.use('/', routes);
-
 // app.use(express.static(__dirname + './public/uploads/images/'));
 
-//not found middleware
-app.get('*', (req, res,next) => {
-    res.status(404).end();
-})
+app.use('/', routes);
+
 //error handler middleware
-app.use((err, req, res, next) => {
-    errorHandler(err,req,res,next);
+app.use(errorHandler);
+
+//not found middleware
+app.get('*', (req, res, next) => {
+    res.status(404).end();
 })
 
 app.listen(PORT, () => {

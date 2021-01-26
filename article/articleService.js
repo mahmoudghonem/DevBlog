@@ -43,7 +43,7 @@ async function getBlogs(req, res) {
         if (err) {
             return res.send(err);
         }
-    })
+    });
 }
 async function getFollowArticles(req, res) {
     const { user } = req;
@@ -129,17 +129,45 @@ async function deletbyId(req, res) {
 
 async function searchBy(req, res) {
     const { user } = req;
-    const { title, author, tags } = req.query;
+    const { title, author, tags, page, limit } = req.query;
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
+    const options = {
+        page: page || 1,
+        limit: limit || 10,
+        sort: { createdAt: -1 }
+    }
     if (title) {
-        return await Article.find({ 'title': { "$regex": title } }).exec();
+        const query = { 'title': { "$regex": title } };
+
+        return await Article.paginate(query, options).then((result) => {
+            return result;
+        }).catch((err) => {
+            if (err) {
+                return res.send(err);
+            }
+        });
     } else if (author) {
-        return await Article.find({ 'author': author }).exec();
+        const query = { 'author': author }
+        return await Article.paginate(query, options).then((result) => {
+            return result;
+        }).catch((err) => {
+            if (err) {
+                return res.send(err);
+            }
+        });
+
     } else if (tags) {
-        return await Article.find({ 'tags': tags }).exec();
+        const query = { 'tags': tags }
+        return await Article.paginate(query, options).then((result) => {
+            return result;
+        }).catch((err) => {
+            if (err) {
+                return res.send(err);
+            }
+        });
     }
 }
 

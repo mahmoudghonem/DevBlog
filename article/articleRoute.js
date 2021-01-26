@@ -44,7 +44,7 @@ function searchByTags(req, res, next) {
 }
 
 function update(req, res, next) {
-    articleService.editbyId(req.params.id, req.body)
+    articleService.editbyId(req, res)
         .then((article) => res.json(article))
         .catch(err => next(err));
 }

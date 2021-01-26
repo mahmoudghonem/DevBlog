@@ -54,10 +54,12 @@ async function create(userParam) {
     await user.save();
 }
 
-async function update(id, userParam) {
-    const user = await User.findById(id);
+async function update(req, res) {
+    const { user } = req;
+    const getUser = await User.findById(user._id);
+
     // validate
-    if (!user) throw 'User not found';
+    if (!getUser) throw 'User not found';
     if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
         throw `Username ${userParam.username} is already taken`;
     }
@@ -71,8 +73,13 @@ async function follow(req, res) {
     const { params: { id } } = req;
 
     const getUser = await User.findById(user._id);
+    const followUser = await User.findById(id);
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+    if (!followUser)
+        return res.sendStatus(404).send("NOT_FOUND");
 
-    await User.updateOne({ _id: user._id }, { $addToSet: { following: id } },
+    await User.updateOne({ _id: getUser._id }, { $addToSet: { following: followUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -80,7 +87,7 @@ async function follow(req, res) {
                 res.send(result);
             }
         });
-    await User.updateOne({ _id: id }, { $addToSet: { following: getUser._id } },
+    await User.updateOne({ _id: followUser._id }, { $addToSet: { follower: getUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -88,15 +95,19 @@ async function follow(req, res) {
                 res.send(result);
             }
         });
-    return;
+    return res.sendStatus(200).json({ message: "FOLLOW" });
 }
 async function unFollow(req, res) {
     const { user } = req;
     const { params: { id } } = req;
-
     const getUser = await User.findById(user._id);
+    const followUser = await User.findById(id);
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+    if (!followUser)
+        return res.sendStatus(404).send("NOT_FOUND");
 
-    await User.updateOne({ _id: user._id }, { $pull: { following: id } },
+    await User.updateOne({ _id: getUser._id }, { $pull: { following: followUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -104,7 +115,7 @@ async function unFollow(req, res) {
                 res.send(result);
             }
         });
-    await User.updateOne({ _id: id }, { $pull: { following: getUser._id } },
+    await User.updateOne({ _id: followUser._id }, { $pull: { following: getUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -112,7 +123,7 @@ async function unFollow(req, res) {
                 res.send(result);
             }
         });
-    return;
+    return res.sendStatus(200).json({ message: "UNFOLLOW" });
 }
 async function getFollowers(id) {
     const { follower } = await getById(id)
@@ -122,10 +133,27 @@ async function getFollowing(id) {
     const { following } = await getById(id)
     return await User.find().where('_id').in(following).exec();
 }
-async function deleteUser(id) {
+async function deleteUser(req, res) {
+    const { user } = req;
+    const { params: { id } } = req;
+    const getUser = await User.findById(user._id);
+
+    if (user._id != id)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+
     await User.findByIdAndRemove(id);
+    return res.sendStatus(200).json({ message: "DELETED" });
+
 }
 async function logout(res, req) {
+    const { user } = req;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+
     await res.status(200).send({ auth: false, token: null });
 
 }

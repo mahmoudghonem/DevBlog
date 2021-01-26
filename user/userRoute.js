@@ -27,7 +27,7 @@ function login(req, res, next) {
 
 function register(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({}))
+        .then(() => res.json({ message: "ACCOUNT_CREATED" }))
         .catch(err => next(err));
 }
 
@@ -50,14 +50,14 @@ function getById(req, res, next) {
 }
 
 function update(req, res, next) {
-    userService.update(req.params.id, req.body)
-        .then(() => res.json({}))
+    userService.update(req,res)
+        .then((e) => res.json(e))
         .catch(err => next(err));
 }
 
 function removeUser(req, res, next) {
-    userService.delete(req.params.id)
-        .then(() => res.json({}))
+    userService.delete(req, res)
+        .then((e) => res.json(e))
         .catch(err => next(err));
 }
 function logout(req, res, next) {
@@ -67,22 +67,22 @@ function logout(req, res, next) {
 }
 function getFollowers(req, res, next) {
     userService.getFollowers(req.params.id)
-        .then((e) => res.json({}))
+        .then((e) => res.json(e))
         .catch(err => next(err));
 }
 function getFollowing(req, res, next) {
     userService.getFollowing(req.params.id)
-        .then(() => res.json({}))
+        .then((e) => res.json(e))
         .catch(err => next(err));
 }
 function follow(req, res, next) {
     userService.follow(req, res)
-        .then(() => res.json({}))
+        .then((e) => res.json(e))
         .catch(err => next(err));
 }
 function unFollow(req, res, next) {
     userService.unFollow(req, res)
-        .then(() => res.json({}))
+        .then((e) => res.json(e))
         .catch(err => next(err));
 }
 module.exports = router;

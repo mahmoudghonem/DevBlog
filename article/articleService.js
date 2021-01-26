@@ -5,34 +5,35 @@ const path = require('path');
 const Article = db.Article;
 const User = db.User;
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads');
-    },
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, 'public/uploads');
+//     },
 
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+//     filename: function (req, file, cb) {
+//         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+//     }
+// });
 
 async function create(req, res) {
     const { body, user } = req
     const getUser = await User.findById(user._id);
-    let upload = multer({ storage: storage, fileFilter: imageFilter }).single('photo');
-    upload(req, res, function (err) {
-        // if (req.fileValidationError) {
-        //  res.send(req.fileValidationError);
-        // }
-        // else if (err instanceof multer.MulterError) {
-        //  res.send(err);
-        // }
-        // else if (err) {
-        //  res.send(err);
-        // }
-        if (req.file != undefined)
-            body.photo = req.file.path;
-    });
-
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+    // let upload = multer({ storage: storage, fileFilter: imageFilter }).single('photo');
+    // upload(req, res, function (err) {
+    //     if (req.fileValidationError) {
+    //      res.send(req.fileValidationError);
+    //     }
+    //     else if (err instanceof multer.MulterError) {
+    //      res.send(err);
+    //     }
+    //     else if (err) {
+    //      res.send(err);
+    //     }
+    //     if (req.file != undefined)
+    //         body.photo = req.file.path;
+    // });
     const article = await Article.create({ ...body, userId: getUser._id }).then((a) => {
         return a;
     });
@@ -52,6 +53,10 @@ async function getAll() {
 async function getFollowArticles(req, res) {
     const { user } = req;
     const followingUID = user.following;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
     return await Article.find('userId').where('_id').in(followingUID).exec();
 }
 async function getById(req, res) {
@@ -65,22 +70,32 @@ async function getById(req, res) {
     });
 
 }
-async function editbyId(id, body) {
+async function editbyId(req, res) {
+    const { user } = req;
+    const { id } = req.params;
+    const getUser = await User.findById(user._id);
+    const article = Article.findById(id);
+    if (getUser._id != article.userId)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
     return await Article.findByIdAndUpdate(id, body, { new: true })
 }
 async function deletbyId(req, res) {
     const { params: { id } } = req;
-    const aId = id;
     const { user } = req;
     const getUser = await User.findById(user._id);
-    await Article.findByIdAndDelete(aId).exec();
-    await User.updateOne({ username: getUser.username }, { $pull: { articles: aId } },
+    const article = Article.findById(id);
+    if (getUser._id != article.userId)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    await Article.findByIdAndDelete(id).exec();
+    await User.updateOne({ username: user.username }, { $pull: { articles: id } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
+            return res.send(result);
+
         });
 }
 async function searchByTitle(title) {
@@ -93,9 +108,10 @@ async function searchByTag(tag) {
 async function doLike(req, res) {
     const { user } = req;
     const { params: { id } } = req;
-
     const getUser = await User.findById(user._id);
     const userId = getUser._id;
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     return await Article.updateOne({ _id: id }, { $addToSet: { likes: userId } },
         function (err, result) {
@@ -109,6 +125,9 @@ async function unLike(req, res) {
     const { params: { id } } = req;
     const getUser = await User.findById(user._id);
     const userId = getUser._id;
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
     return await Article.updateOne({ _id: id }, { $pull: { likes: userId } },
         function (err, result) {
             if (err) {
@@ -120,8 +139,11 @@ async function comment(req, res) {
     const { user } = req;
     const { params: { id } } = req;
     const { body: { comment } } = req;
-    const getUser = await User.findById(user._id);
-    const userId = getUser._id;
+    const userId = user._id;
+    const getUser = await User.findById(userId);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
     return await Article.updateOne({ _id: id }, { $addToSet: { comments: { userId, comment } } },
         function (err, result) {
             if (err) {

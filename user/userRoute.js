@@ -13,7 +13,7 @@ router.get('/following/:id', jwtAuth, getFollowing);
 router.get('/followers/:id', jwtAuth, getFollowers);
 router.patch('/follow/:id', jwtAuth, follow);
 router.patch('/unfollow/:id', jwtAuth, unFollow);
-router.patch('/update/:id', jwtAuth, update);
+router.patch('/update/', jwtAuth, update);
 router.delete('/delete/', jwtAuth, removeUser);
 router.get('/logout', jwtAuth, logout);
 

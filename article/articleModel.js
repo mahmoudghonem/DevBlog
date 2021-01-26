@@ -18,15 +18,19 @@ const ArticleModel = new Schema({
         type: Date,
         default: Date.now
     },
-    // photo: {
-    //     data: Buffer,
-    //     contentType: String
-    // },
+    photo: {
+        type: String,
+        // contentType: String
+    },
     updatedAt: Date,
     likes: [String],
     comments: [{
         id: String,
-        comment: String
+        comment: String,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
     }],
     reads: {
         type: Number,

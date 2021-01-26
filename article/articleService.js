@@ -1,6 +1,22 @@
 const db = require('../helper/db');
 const Article = db.Article;
 const User = db.User;
+const multer = require('multer');
+const imageHandler = require('../helper/imageHandler');
+const path = require('path');
+
+
+// //Set Storage Engine
+// const storage = multer.diskStorage({
+//     destination: './public/uploads/images',
+//     filename: function (req, file, cb) {
+//         cb(null, file.fieldname + '-' + Date.now() +
+//             path.extname(file.originalname));
+//     }
+// });
+
+// const upload = multer({ storage: storage, fileFilter: imageHandler }).single('image');
+
 
 
 async function create(req, res) {
@@ -8,6 +24,19 @@ async function create(req, res) {
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    // console.log(req.body); // return empty
+    // console.log(req.file); // return empty
+
+    // await upload(req, res, function (err) {
+
+    //     console.log(req.body); // return full value
+    //     console.log(req.file); // return full value
+
+    //     if (err) {
+    //         return res.end("Something went wrong!" + err);
+    //     }
+    // });
 
     const username = getUser.username;
     const userId = getUser._id;
@@ -52,7 +81,7 @@ async function getFollowArticles(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    return await Article.find('userId').where('_id').in(followingUID).exec();
+    return await Article.find({ 'userId': followingUID }).exec();
 }
 async function getMyArticles(req, res) {
     const { user } = req;
@@ -78,6 +107,21 @@ async function saveArticle(req, res) {
             }
         });
 }
+async function removeSavedArticle(req, res) {
+    const { user } = req;
+    const { id } = req.params;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    const article = await Article.findById(id);
+    await User.updateOne({ username: getUser.username }, { $pull: { savearticles: article._id } },
+        function (err, result) {
+            if (err) {
+                res.send(err);
+            }
+        });
+}
 async function getSavedArticles(req, res) {
     const { user } = req;
     const savedUID = user.savearticles;
@@ -85,7 +129,7 @@ async function getSavedArticles(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    return await Article.find('_id').where('_id').in(savedUID).exec();
+    return await Article.find({ '_id': savedUID }).exec();
 }
 async function getById(req, res) {
     const { id } = req.params;
@@ -201,6 +245,12 @@ async function unLike(req, res) {
             }
         });
 }
+async function likesCount(req, res) {
+    const { params: { id } } = req;
+    const article = await Article.findById(id);
+    const likes = article.likes;
+    return likes.length;
+}
 async function comment(req, res) {
     const { user } = req;
     const { params: { id } } = req;
@@ -227,9 +277,11 @@ module.exports = {
     searchBy,
     doLike,
     unLike,
+    likesCount,
     comment,
     getSavedArticles,
     saveArticle,
+    removeSavedArticle,
     getFollowArticles,
     getMyArticles
 }

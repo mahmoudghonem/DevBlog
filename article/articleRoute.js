@@ -1,7 +1,8 @@
 const express = require('express');
 const articleService = require('./articleService');
 const router = express.Router();
-const jwtAuth = require('../helper/jwt')
+const jwtAuth = require('../helper/jwt');
+
 
 // routes
 router.get('/', getAll);
@@ -11,22 +12,24 @@ router.get('/followArticles', jwtAuth, getFollowingArticles);
 router.get('/savedArticles', jwtAuth, getSavedArticles);
 router.get('/search/', jwtAuth, searchBy);
 router.get('/:id', getById);
+router.get('/likecount/:id', likesCount);
 router.post('/create', jwtAuth, createArticle);
 router.patch('/update/:id', jwtAuth, update);
 router.patch('/like/:id', jwtAuth, like);
 router.patch('/dislike/:id', jwtAuth, dislike);
 router.patch('/comment/:id', jwtAuth, comment);
 router.patch('/saveArticle/:id', jwtAuth, saveArticle);
+router.patch('/removeSavedArticle/:id', jwtAuth, removeSavedArticle);
 router.delete('/delete/:id', jwtAuth, removeArticle);
 
 
 function getAll(req, res, next) {
-    articleService.getAll(req,res)
+    articleService.getAll(req, res)
         .then(articles => res.json(articles))
         .catch(err => next(err));
 }
 function getBlogs(req, res, next) {
-    articleService.getBlogs(req,res)
+    articleService.getBlogs(req, res)
         .then(articles => res.json(articles))
         .catch(err => next(err));
 }
@@ -58,6 +61,11 @@ function update(req, res, next) {
         .then((article) => res.json(article))
         .catch(err => next(err));
 }
+function likesCount(req, res, next) {
+    articleService.likesCount(req, res)
+        .then((e) => res.json(e))
+        .catch(err => next(err));
+}
 function like(req, res, next) {
     articleService.doLike(req, res)
         .then((e) => res.json({ message: "LIKED" }))
@@ -75,7 +83,12 @@ function comment(req, res, next) {
 }
 function saveArticle(req, res, next) {
     articleService.saveArticle(req, res)
-        .then((e) => res.json({ message: "Saved" }))
+        .then((e) => res.json({ message: "SAVED" }))
+        .catch(err => next(err));
+}
+function removeSavedArticle(req, res, next) {
+    articleService.removeSavedArticle(req, res)
+        .then((e) => res.json({ message: "UNSAVED" }))
         .catch(err => next(err));
 }
 function getSavedArticles(req, res, next) {

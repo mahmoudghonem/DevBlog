@@ -1,37 +1,13 @@
 const db = require('../helper/db');
-const multer = require('multer');
-const { imageFilter } = require('../helper/imageHandler');
-var fs = require('fs');
-const path = require('path');
 const Article = db.Article;
 const User = db.User;
 
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, 'uploads');
-//     },
-
-//     filename: function (req, file, cb) {
-//         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-//     }
-// });
 
 async function create(req, res) {
     const { body, user } = req
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
-
-    // let upload = multer({ storage: storage, fileFilter: imageFilter }).single('photo');
-    // upload(req, res, function (err) {
-    //     if (req.file != undefined) {
-    //         let img = {
-    //             data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
-    //             contentType: 'image/png'
-    //         };
-    //         body.photo = img;
-    //     }
-    // });
 
     const article = await Article.create({ ...body, userId: getUser._id }).then((a) => {
         return a;

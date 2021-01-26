@@ -2,14 +2,16 @@ const express = require('express');
 const articleService = require('./articleService');
 const router = express.Router();
 const jwtAuth = require('../helper/jwt')
+
 // routes
 router.get('/', getAll);
+router.get('/getBlogs', getBlogs);
 router.get('/myarticles', jwtAuth, getMyArticles);
 router.get('/followArticles', jwtAuth, getFollowingArticles);
 router.get('/savedArticles', jwtAuth, getSavedArticles);
 router.get('/search/', jwtAuth, searchBy);
-router.post('/create', jwtAuth, createArticle);
 router.get('/:id', getById);
+router.post('/create', jwtAuth, createArticle);
 router.patch('/update/:id', jwtAuth, update);
 router.patch('/like/:id', jwtAuth, like);
 router.patch('/dislike/:id', jwtAuth, dislike);
@@ -19,7 +21,12 @@ router.delete('/delete/:id', jwtAuth, removeArticle);
 
 
 function getAll(req, res, next) {
-    articleService.getAll()
+    articleService.getAll(req,res)
+        .then(articles => res.json(articles))
+        .catch(err => next(err));
+}
+function getBlogs(req, res, next) {
+    articleService.getBlogs(req,res)
         .then(articles => res.json(articles))
         .catch(err => next(err));
 }

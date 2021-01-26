@@ -24,8 +24,26 @@ async function create(req, res) {
 
 }
 
-async function getAll() {
-    return await Article.find();
+async function getAll(req, res) {
+    return await Article.find().sort({ createdAt: -1 });
+}
+async function getBlogs(req, res) {
+    const { limit } = req.query;
+    const { page } = req.query;
+    const query = {};
+
+    const options = {
+        page: page || 1,
+        limit: limit || 10,
+        sort: { createdAt: -1 }
+    }
+    return await Article.paginate(query, options).then((result) => {
+        return result;
+    }).catch((err) => {
+        if (err) {
+            return res.send(err);
+        }
+    })
 }
 async function getFollowArticles(req, res) {
     const { user } = req;
@@ -117,7 +135,7 @@ async function searchBy(req, res) {
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     if (title) {
-        return await Article.find({ 'title':  { "$regex" : title}}).exec();
+        return await Article.find({ 'title': { "$regex": title } }).exec();
     } else if (author) {
         return await Article.find({ 'author': author }).exec();
     } else if (tags) {
@@ -174,6 +192,7 @@ async function comment(req, res) {
 module.exports = {
     create,
     getAll,
+    getBlogs,
     getById,
     editbyId,
     deletbyId,

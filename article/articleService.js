@@ -1,40 +1,12 @@
 const db = require('../helper/db');
 const Article = db.Article;
 const User = db.User;
-const multer = require('multer');
-const imageHandler = require('../helper/imageHandler');
-const path = require('path');
-
-
-// //Set Storage Engine
-// const storage = multer.diskStorage({
-//     destination: './public/uploads/images',
-//     filename: function (req, file, cb) {
-//         cb(null, file.fieldname + '-' + Date.now() +
-//             path.extname(file.originalname));
-//     }
-// });
-
-// const upload = multer({ storage: storage, fileFilter: imageHandler }).single('image');
 
 async function create(req, res) {
     const { body, user } = req
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
-
-    // console.log(req.body); // return empty
-    // console.log(req.file); // return empty
-
-    // await upload(req, res, function (err) {
-
-    //     console.log(req.body); // return full value
-    //     console.log(req.file); // return full value
-
-    //     if (err) {
-    //         return res.end("Something went wrong!" + err);
-    //     }
-    // });
 
     const username = getUser.username;
     const userId = getUser._id;
@@ -134,6 +106,7 @@ async function getById(req, res) {
     const article = await Article.findById(id);
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
+        
     const reads = article.reads + 1;
     return await Article.findByIdAndUpdate({ _id: id }, { $set: { reads: reads } }, { new: true }, (err, doc) => {
         if (err) {
@@ -143,18 +116,24 @@ async function getById(req, res) {
 
 }
 async function editbyId(req, res) {
-    const { user } = req;
+    const { body, user } = req;
     const { id } = req.params;
-    const getUser = await User.findById(user._id);
-    const article = Article.findById(id);
+    const getUser = await User.findById(user._id).exec();
+    const article = await Article.findById(id).exec();
+
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
-    if (getUser._id != article.userId)
+    if ((getUser._id).toString() != (article.userId).toString())
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    return await Article.findByIdAndUpdate(id, body, { new: true })
+    body.updatedAt = Date.now();
+    return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
+        if (err) {
+            res.send(err);
+        }
+    });
 }
 async function deletbyId(req, res) {
     const { params: { id } } = req;
@@ -165,7 +144,7 @@ async function deletbyId(req, res) {
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
-    if (getUser._id != article.userId)
+    if ((getUser._id).toString() != (article.userId).toString())
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     await Article.findByIdAndDelete(id).exec();

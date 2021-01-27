@@ -18,10 +18,6 @@ const ArticleModel = new Schema({
         type: Date,
         default: Date.now
     },
-    photo: {
-        type: String,
-        // contentType: String
-    },
     updatedAt: Date,
     likes: [String],
     comments: [{

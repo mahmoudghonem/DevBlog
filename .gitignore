@@ -2126,3 +2126,14 @@ node_modules/mongoose-paginate-v2/dist/index.js
 node_modules/mongoose-paginate-v2/src/index.js
 node_modules/mongoose-paginate-v2/static/banner.jpg
 node_modules/mongoose-paginate-v2/tests/index.js
+node_modules/formidable/benchmark-2020-01-29_xeon-x3440.png
+node_modules/formidable/LICENSE
+node_modules/formidable/package.json
+node_modules/formidable/README.md
+node_modules/formidable/lib/file.js
+node_modules/formidable/lib/incoming_form.js
+node_modules/formidable/lib/index.js
+node_modules/formidable/lib/json_parser.js
+node_modules/formidable/lib/multipart_parser.js
+node_modules/formidable/lib/octet_parser.js
+node_modules/formidable/lib/querystring_parser.js

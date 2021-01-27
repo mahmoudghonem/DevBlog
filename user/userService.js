@@ -4,7 +4,8 @@ const bcrypt = require('bcryptjs');
 const db = require('../helper/db');
 const User = db.User;
 
-async function login({ username, password }) {
+async function login(req, res) {
+    const { username, password } = req.body;
     const user = await User.findOne({ username });
     // validate
     if (!user) {
@@ -32,10 +33,8 @@ async function login({ username, password }) {
         //     process.env.REFRESH_TOKEN_SECRET,
         //     { expiresIn: process.env.REFRESH_TOKEN_LIFE }
         // );
-        return {
-            ...user.toJSON(),
-            token
-        };
+
+        res.cookie('token', token, { httpOnly: true, }).send();
     }
 }
 async function getAll() {

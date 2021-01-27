@@ -19,7 +19,7 @@ router.get('/logout', jwtAuth, logout);
 
 
 function login(req, res, next) {
-    userService.login(req.body)
+    userService.login(req,res)
         .then((user) => {
             user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' })
         }).catch(err => next(err));

@@ -2137,3 +2137,9 @@ node_modules/formidable/lib/json_parser.js
 node_modules/formidable/lib/multipart_parser.js
 node_modules/formidable/lib/octet_parser.js
 node_modules/formidable/lib/querystring_parser.js
+node_modules/cors/CONTRIBUTING.md
+node_modules/cors/HISTORY.md
+node_modules/cors/LICENSE
+node_modules/cors/package.json
+node_modules/cors/README.md
+node_modules/cors/lib/index.js

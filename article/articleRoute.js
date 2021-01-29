@@ -2,6 +2,7 @@ const express = require('express');
 const articleService = require('./articleService');
 const router = express.Router();
 const jwtAuth = require('../helper/jwt');
+const imageFile = require("../helper/img");
 
 
 // routes
@@ -13,8 +14,9 @@ router.get('/savedArticles', jwtAuth, getSavedArticles);
 router.get('/search/', jwtAuth, searchBy);
 router.get('/:id', getById);
 router.get('/likecount/:id', likesCount);
-router.post('/create', jwtAuth, createArticle);
-router.patch('/update/:id', jwtAuth, update);
+// router.get('/comments/:id', );
+router.post('/create', jwtAuth, imageFile, createArticle);
+router.patch('/update/:id', jwtAuth, imageFile, update);
 router.patch('/like/:id', jwtAuth, like);
 router.patch('/dislike/:id', jwtAuth, dislike);
 router.patch('/comment/:id', jwtAuth, comment);

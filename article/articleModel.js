@@ -19,10 +19,20 @@ const ArticleModel = new Schema({
         default: Date.now
     },
     updatedAt: Date,
+    photo: {
+        type: String,
+    },
     likes: [String],
     comments: [{
-        id: String,
-        comment: String,
+        id: {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        },
+        comment: {
+            type: String,
+            maxlength: 500,
+            required: true
+        },
         createdAt: {
             type: Date,
             default: Date.now
@@ -36,8 +46,9 @@ const ArticleModel = new Schema({
         type: String
     },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'users'
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+        required: true,
     },
 
 });

@@ -33,8 +33,8 @@ async function login(req, res) {
         //     process.env.REFRESH_TOKEN_SECRET,
         //     { expiresIn: process.env.REFRESH_TOKEN_LIFE }
         // );
-
-        res.cookie('token', token, { httpOnly: true, }).send();
+        //  res.cookie('token', token, { httpOnly: true, }).send();
+        return { ...user.toJSON(), token };
     }
 }
 async function getAll() {
@@ -53,27 +53,49 @@ async function getMe(req, res) {
     return await User.findById(user._id);
 }
 
-async function create(userParam) {
+async function create(req, res) {
+    const { body } = req;
+
     // validate
-    if (await User.findOne({ username: userParam.username })) {
-        throw `Username ${userParam.username} is already taken`;
+    if (await User.findOne({ username: body.username })) {
+        throw `Username ${body.username} is already taken`;
     }
-    const user = new User(userParam);
+    const user = new User(body);
     await user.save();
 }
 
 async function update(req, res) {
-    const { user } = req;
+    const { user, body, file } = req;
     const getUser = await User.findById(user._id);
 
     // validate
     if (!getUser) throw 'User not found';
-    if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
-        throw `Username ${userParam.username} is already taken`;
+    if (user.username !== body.username && await User.findOne({ username: body.username })) {
+        throw `Username ${body.username} is already taken`;
     }
-    // copy userParam properties to user
-    Object.assign(user, userParam);
-    await user.findOneAndUpdate();
+
+
+    const url = req.protocol + "://" + req.get("host");
+    if (file) {
+        const image = url + "/images/" + req.file.filename;
+        const user = {
+            ...body,
+            profilePhoto: image
+        }
+        await User.updateOne({ _id: getUser._id }, user,
+            function (err, result) {
+                if (err) {
+                    res.send(err);
+                }
+            });
+    } else {
+        await User.updateOne({ _id: getUser._id }, body,
+            function (err, result) {
+                if (err) {
+                    res.send(err);
+                }
+            });
+    }
 }
 
 async function follow(req, res) {
@@ -170,8 +192,10 @@ async function logout(res, req) {
     if (!getUser)
         return res.sendStatus(403).send("UN_AUTHENTICATED");
 
+    const token = null;
+    await res.cookie('token', token, { httpOnly: true, }).send();
     await res.status(200).send({ auth: false, token: null });
-
+    return;
 }
 module.exports = {
     login,

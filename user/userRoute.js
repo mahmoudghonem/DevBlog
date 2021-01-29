@@ -2,6 +2,7 @@ const express = require('express');
 const userService = require('./userService');
 const router = express.Router();
 const jwtAuth = require('../helper/jwt')
+const imageFile = require("../helper/img");
 
 // routes
 router.post('/authenticate', login);
@@ -13,20 +14,20 @@ router.get('/following/:id', jwtAuth, getFollowing);
 router.get('/followers/:id', jwtAuth, getFollowers);
 router.patch('/follow/:id', jwtAuth, follow);
 router.patch('/unfollow/:id', jwtAuth, unFollow);
-router.patch('/update/', jwtAuth, update);
+router.patch('/update/', jwtAuth, imageFile, update);
 router.delete('/delete/', jwtAuth, removeUser);
 router.get('/logout', jwtAuth, logout);
 
 
 function login(req, res, next) {
-    userService.login(req,res)
+    userService.login(req, res)
         .then((user) => {
             user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' })
         }).catch(err => next(err));
 }
 
 function register(req, res, next) {
-    userService.create(req.body)
+    userService.create(req, res)
         .then(() => res.json({ message: "ACCOUNT_CREATED" }))
         .catch(err => next(err));
 }

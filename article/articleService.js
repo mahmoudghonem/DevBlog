@@ -3,16 +3,27 @@ const Article = db.Article;
 const User = db.User;
 
 async function create(req, res) {
-    const { body, user } = req
+    const { body, user, file } = req;
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     const username = getUser.username;
     const userId = getUser._id;
-    const article = await Article.create({ ...body, author: username, userId: userId }).then((a) => {
-        return a;
-    });
+
+    const url = req.protocol + "://" + req.get("host");
+    let article;
+    if (file) {
+        const image = url + "/images/" + req.file.filename;
+        article = await Article.create({ ...body, photo: image, author: username, userId: userId }).then((a) => {
+            return a;
+        });
+    } else {
+        article = await Article.create({ ...body, author: username, userId: userId }).then((a) => {
+            return a;
+        });
+    }
+
     await User.updateOne({ username: getUser.username }, { $addToSet: { articles: article._id } },
         function (err, result) {
             if (err) {
@@ -106,7 +117,7 @@ async function getById(req, res) {
     const article = await Article.findById(id);
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
-        
+
     const reads = article.reads + 1;
     return await Article.findByIdAndUpdate({ _id: id }, { $set: { reads: reads } }, { new: true }, (err, doc) => {
         if (err) {
@@ -129,11 +140,25 @@ async function editbyId(req, res) {
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     body.updatedAt = Date.now();
-    return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
-        if (err) {
-            res.send(err);
-        }
-    });
+
+    const file = req.filename | false;
+    const url = req.protocol + "://" + req.get("host");
+    if (file) {
+        const image = url + "/images/" + req.file.filename;
+        body.photo = image;
+        return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
+            if (err) {
+                res.send(err);
+            }
+        });
+    } else {
+        return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
+            if (err) {
+                res.send(err);
+            }
+        });
+    }
+
 }
 async function deletbyId(req, res) {
     const { params: { id } } = req;

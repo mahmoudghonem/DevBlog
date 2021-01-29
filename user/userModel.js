@@ -34,6 +34,9 @@ const UserModel = new Schema({
         type: Date,
         default: Date.now
     },
+    profilePhoto: {
+        type: String
+    },
     following: [String],
     follower: [String],
     articles: [String],

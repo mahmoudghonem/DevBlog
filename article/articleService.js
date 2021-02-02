@@ -270,7 +270,7 @@ async function comment(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    return await Article.updateOne({ _id: id }, { $addToSet: { comments: { userId, comment } } },
+    return await Article.updateOne({ _id: id }, { $addToSet: { comments: { commentId: userId, comment: comment } } },
         function (err, result) {
             if (err) {
                 res.send(err);

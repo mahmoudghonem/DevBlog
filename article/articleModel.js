@@ -24,7 +24,7 @@ const ArticleModel = new Schema({
     },
     likes: [String],
     comments: [{
-        id: {
+        commentId: {
             type: Schema.Types.ObjectId,
             ref: 'users'
         },
@@ -36,7 +36,23 @@ const ArticleModel = new Schema({
         createdAt: {
             type: Date,
             default: Date.now
-        }
+        },
+        replay: [{
+            replayId: {
+                type: Schema.Types.ObjectId,
+                ref: 'users'
+            },
+            replay: {
+                type: String,
+                maxlength: 500,
+                required: true
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            },
+        }],
+
     }],
     reads: {
         type: Number,

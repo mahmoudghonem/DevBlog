@@ -14,7 +14,8 @@ router.get('/savedArticles', jwtAuth, getSavedArticles);
 router.get('/search/', jwtAuth, searchBy);
 router.get('/:id', getById);
 router.get('/likecount/:id', likesCount);
-// router.get('/comments/:id', );
+// router.get('/comments/:id',jwtAuth,getArticleComments );
+// router.patch('/comments/:id/:id',jwtAuth,replayToComment );
 router.post('/create', jwtAuth, imageFile, createArticle);
 router.patch('/update/:id', jwtAuth, imageFile, update);
 router.patch('/like/:id', jwtAuth, like);
@@ -83,6 +84,17 @@ function comment(req, res, next) {
         .then((e) => res.json({ message: "COMMENTED" }))
         .catch(err => next(err));
 }
+// function getArticleComments(req, res, next) {
+//     articleService.getArticleComments(req, res)
+//         .then((e) => res.json(e))
+//         .catch(err => next(err));
+// }
+
+// function replayToComment(req, res, next) {
+//     articleService.getArticleComments(req, res)
+//         .then((e) => res.json(e))
+//         .catch(err => next(err));
+// }
 function saveArticle(req, res, next) {
     articleService.saveArticle(req, res)
         .then((e) => res.json({ message: "SAVED" }))

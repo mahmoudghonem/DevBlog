@@ -9,12 +9,12 @@ async function login(req, res) {
     const user = await User.findOne({ username });
     // validate
     if (!user) {
-        throw Error('Wrong Username');
+        throw Error('WRONG_USERNAME');
     }
     const ValidPass = user.validatePassword(password);
     // validate
     if (!ValidPass) {
-        throw Error('Wrong Password');
+        throw Error('WRONG_PASSWORD');
     }
     // validate
 

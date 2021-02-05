@@ -60,11 +60,11 @@ async function create(req, res) {
 
     // validate
     if (await User.findOne({ username: body.username })) {
-        res.status(400).send({ message: "Failed! Username is already in use!" });
+        res.status(400).send({ message: "USERNAME_TAKEN" });
         return;
     }
     if (await User.findOne({ email: body.email })) {
-        res.status(400).send({ message: "Failed! Email is already in use!" });
+        res.status(400).send({ message: "EMAIL_REGISTERED" });
         return;
     }
     const user = new User(body);

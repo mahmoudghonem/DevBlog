@@ -9,12 +9,14 @@ async function login(req, res) {
     const user = await User.findOne({ username });
     // validate
     if (!user) {
-        throw Error('WRONG_USERNAME');
+        res.status(404).send({ message: "WRONG_USERNAME" });
+        return;
     }
     const ValidPass = user.validatePassword(password);
     // validate
     if (!ValidPass) {
-        throw Error('WRONG_PASSWORD');
+        res.status(400).send({ message: "WRONG_PASSWORD" });
+        return;
     }
     // validate
 
@@ -58,7 +60,12 @@ async function create(req, res) {
 
     // validate
     if (await User.findOne({ username: body.username })) {
-        throw `Username ${body.username} is already taken`;
+        res.status(400).send({ message: "Failed! Username is already in use!" });
+        return;
+    }
+    if (await User.findOne({ email: body.email })) {
+        res.status(400).send({ message: "Failed! Email is already in use!" });
+        return;
     }
     const user = new User(body);
     await user.save();
@@ -192,10 +199,7 @@ async function logout(res, req) {
     if (!getUser)
         return res.sendStatus(403).send("UN_AUTHENTICATED");
 
-    const token = null;
-    await res.cookie('token', token, { httpOnly: true, }).send();
-    await res.status(200).send({ auth: false, token: null });
-    return;
+    return await res.status(200).send({ auth: false, token: null });
 }
 module.exports = {
     login,

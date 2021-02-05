@@ -47,7 +47,6 @@ const UserModel = new Schema({
         versionKey: false,
         transform: (doc, ret, options) => {
             delete ret.password;
-            delete ret.email;
             return ret;
         },
     },

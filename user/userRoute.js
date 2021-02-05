@@ -16,6 +16,8 @@ router.patch('/follow/:id', jwtAuth, follow);
 router.patch('/unfollow/:id', jwtAuth, unFollow);
 router.patch('/update/', jwtAuth, imageFile, update);
 router.delete('/delete/', jwtAuth, removeUser);
+router.get('/usernamecheck', checkEmail);
+router.get('/emailcheck', checkUsername);
 router.get('/logout', jwtAuth, logout);
 
 
@@ -86,4 +88,15 @@ function unFollow(req, res, next) {
         .then((e) => res.json(e))
         .catch(err => next(err));
 }
+function checkEmail(req, res, next) {
+    userService.checkEmail(req, res)
+        .then((e) => res.json(e))
+        .catch(err => next(err));
+}
+function checkUsername(req, res, next) {
+    userService.checkUsername(req, res)
+        .then((e) => res.json(e))
+        .catch(err => next(err));
+}
+
 module.exports = router;

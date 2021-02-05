@@ -70,6 +70,23 @@ async function create(req, res) {
     const user = new User(body);
     await user.save();
 }
+async function checkUsername(req, res) {
+    const { body } = req;
+    if (await User.findOne({ username: body.username })) {
+        res.status(400).send({ message: "USERNAME_TAKEN" });
+        return;
+    }
+    return false;
+}
+}
+async function checkEmail(req, res) {
+    const { body } = req;
+    if (await User.findOne({ email: body.email })) {
+        res.status(400).send({ message: "EMAIL_REGISTERED" });
+        return;
+    }
+    return false;
+}
 
 async function update(req, res) {
     const { user, body, file } = req;
@@ -213,5 +230,7 @@ module.exports = {
     getFollowers,
     getFollowing,
     follow,
-    unFollow
+    unFollow,
+    checkEmail,
+    checkUsername,
 };

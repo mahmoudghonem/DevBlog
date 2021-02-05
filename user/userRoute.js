@@ -16,8 +16,8 @@ router.patch('/follow/:id', jwtAuth, follow);
 router.patch('/unfollow/:id', jwtAuth, unFollow);
 router.patch('/update/', jwtAuth, imageFile, update);
 router.delete('/delete/', jwtAuth, removeUser);
-router.get('/usernamecheck', checkEmail);
-router.get('/emailcheck', checkUsername);
+router.get('/usernamecheck', checkUsername);
+router.get('/emailcheck', checkEmail);
 router.get('/logout', jwtAuth, logout);
 
 

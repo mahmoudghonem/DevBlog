@@ -78,7 +78,7 @@ async function checkUsername(req, res) {
     }
     return false;
 }
-}
+
 async function checkEmail(req, res) {
     const { body } = req;
     if (await User.findOne({ email: body.email })) {

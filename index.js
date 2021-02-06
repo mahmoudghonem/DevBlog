@@ -1,8 +1,6 @@
 require('dotenv').config()
 const express = require('express');
-const path = require("path");
 const routes = require('./routes')
-const errorHandler = require('./helper/errorHandler');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 80;
@@ -22,13 +20,34 @@ app.use(cors());
 
 app.use('/', routes);
 
-//error handler middleware
-app.use(errorHandler);
-
 //not found middleware
-app.get('*', (req, res, next) => {
+app.get((req, res, next) => {
     res.status(404).end();
 })
+
+
+// error middleware handler
+app.use((err, req, res, next) => {
+    if (err instanceof mongoose.Error) {
+        res.status(422).json(err.message);
+    }
+    if (err.code == 11000) {
+        res.status(422).json({
+            statusCode: 'validatorError', property: err.keyValue,
+        });
+    };
+    if (err.message === 'AUTHENTICATION_REQUIRED') {
+        res.status(401).json({
+            statusCode: 'validatorError', property: err.keyValue,
+        });
+    };
+
+    const { statusCode = 500 } = err;
+    res.status(statusCode).json(err.message);
+});
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Running on port ${PORT}`);

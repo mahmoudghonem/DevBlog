@@ -1,7 +1,6 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../user/userModel');
-const CustomError = require('../helper/errorHandler')
 const verifyJWT = promisify(jwt.verify);
 
 

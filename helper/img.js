@@ -1,27 +1,23 @@
 const multer = require("multer");
+const path = require('path')
 
-const MIME_TYPE_MAPS = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/jpg": "jpg",
-  "image/gif": "gif",
-};
+const imageFilter = function (req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    req.fileValidationError = 'Only image files are allowed!';
+    return cb(new Error('Only image files are allowed!'), false);
+  }
+  cb(null, true);
+}
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(error, "/public/uploads");
+    },
+    filename: (req, file, cb) => {
+     let name=path.extname(file.originalname);
+      cb(null, file.fieldname + '-' + Date.now().toString().replace(/:/g, '-') + name);
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const isValid = MIME_TYPE_MAPS[file.mimetype];
-    let error = new Error("Invalid mime type");
-    if (isValid) {
-      error = null;
-    }
-    cb(error, "public/uploads");
-  },
-  filename: (req, file, cb) => {
-    const name = file.originalname.toLowerCase().split(".").join("-");
-    const extension = MIME_TYPE_MAPS[file.mimetype];
-    cb(null, file.fieldname + '-' + Date.now().toString().replace(/:/g, '-') + name);
+    },
+  });
 
-  },
-});
-
-module.exports = multer({ storage: storage }).single("image");
+  module.exports = multer({ storage: storage, fileFilter: imageFilter }).single("image");

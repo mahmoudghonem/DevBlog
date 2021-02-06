@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.use('/users', user);
 router.use('/articles', article);
-router.use('/', (req, res) => {
-    res.send("HELLO TO OUR DEVS BLOG BACKEND")
-});
+// router.use('/', (req, res) => {
+//     res.send("HELLO TO OUR DEVS BLOG BACKEND")
+// });
 module.exports = router;

@@ -13,7 +13,7 @@ async function create(req, res) {
 
     let article;
     if (file) {
-        const image = req.file.path.replace(/\\/g, "/").substring("public".length);;
+        const image = req.file.path.replace(/\\/g, "/");
         article = await Article.create({ ...body, photo: image, author: username, userId: userId }).then((a) => {
             return a;
         });

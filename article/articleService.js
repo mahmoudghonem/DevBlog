@@ -12,7 +12,6 @@ async function create(req, res) {
     const userId = getUser._id;
 
     let article;
-    console.log(file);
     if (file) {
         const image = req.file.path;
         article = await Article.create({ ...body, photo: image, author: username, userId: userId }).then((a) => {

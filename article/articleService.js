@@ -11,10 +11,10 @@ async function create(req, res) {
     const username = getUser.username;
     const userId = getUser._id;
 
-    const url = req.protocol + "://" + req.get("host");
     let article;
+    console.log(file);
     if (file) {
-        const image = url + "/images/" + req.file.filename;
+        const image = req.file.path;
         article = await Article.create({ ...body, photo: image, author: username, userId: userId }).then((a) => {
             return a;
         });
@@ -61,7 +61,7 @@ async function getFollowArticles(req, res) {
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
-        
+
     const { limit } = req.query;
     const { page } = req.query;
     const query = { 'userId': followingUID };

@@ -2143,3 +2143,10 @@ node_modules/cors/LICENSE
 node_modules/cors/package.json
 node_modules/cors/README.md
 node_modules/cors/lib/index.js
+node_modules/.package-lock.json
+node_modules/fsevents/fsevents.d.ts
+node_modules/fsevents/fsevents.js
+node_modules/fsevents/fsevents.node
+node_modules/fsevents/LICENSE
+node_modules/fsevents/package.json
+node_modules/fsevents/README.md

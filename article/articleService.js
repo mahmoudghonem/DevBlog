@@ -61,8 +61,24 @@ async function getFollowArticles(req, res) {
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
+        
+    const { limit } = req.query;
+    const { page } = req.query;
+    const query = { 'userId': followingUID };
 
-    return await Article.find({ 'userId': followingUID }).exec();
+    const options = {
+        page: page || 1,
+        limit: limit || 10,
+        sort: { createdAt: -1 }
+    }
+    return await Article.paginate(query, options).then((result) => {
+        return result;
+    }).catch((err) => {
+        if (err) {
+            return res.send(err);
+        }
+    });
+    // return await Article.find({ 'userId': followingUID }).exec();
 }
 async function getMyArticles(req, res) {
     const { user } = req;

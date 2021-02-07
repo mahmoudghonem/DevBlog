@@ -11,11 +11,11 @@ const imageFilter = function (req, file, cb) {
 }
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, ".public/uploads");
+      cb(null, 'public/uploads');
     },
     filename: (req, file, cb) => {
      let name=path.extname(file.originalname);
-      cb(null, file.fieldname + '-' + Date.now().toString().replace(/:/g, '-') + name);
+     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
 
     },
   });

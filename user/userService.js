@@ -199,6 +199,16 @@ async function getFollowing(req, res) {
     const { following } = await getById(id)
     return await User.find({ '_id': following }).exec();
 }
+async function getUsersSuggestions(req, res) {
+    const { user } = req;
+    const { params: { id } } = req;
+    const getUser = await User.findById(user._id);
+    if (!getUser)
+        return res.sendStatus(403).send("UN_AUTHENTICATED");
+
+    const { following } = await getById(id)
+    return await User.find({ '_id': { $nin: following } }).exec();
+}
 async function deleteUser(req, res) {
     const { user } = req;
     const getUser = await User.findById(user._id);
@@ -229,6 +239,7 @@ module.exports = {
     logout,
     getFollowers,
     getFollowing,
+    getUsersSuggestions,
     follow,
     unFollow,
     checkEmail,

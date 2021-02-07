@@ -11,12 +11,15 @@ const imageFilter = function (req, file, cb) {
 }
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './uploads');
+     cb(null, 'uploads/');
+
   },
   filename: (req, file, cb) => {
     //  let name=path.extname(file.originalname);
     //  cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    cb(null, file.originalname)
+     cb(null, new Date().toISOString().replace(/:/g, '-')+ file.originalname);
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    // cb(null, file.fieldname + '-' + uniqueSuffix);
   },
 });
 

@@ -22,6 +22,9 @@ const ArticleModel = new Schema({
     photo: {
         type: String,
     },
+    cloudinary_id: {
+        type: String,
+    },
     likes: [String],
     comments: [{
         commentId: {

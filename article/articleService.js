@@ -1,7 +1,7 @@
 const db = require('../helper/db');
 const Article = db.Article;
 const User = db.User;
-const fs = require("fs");
+const cloudinary = require("../helper/cloudinary");
 
 async function create(req, res) {
     const { body, user, file } = req;
@@ -11,11 +11,14 @@ async function create(req, res) {
 
     const username = getUser.username;
     const userId = getUser._id;
-    const url = req.protocol + "://" + req.get("host") + '/';
     let article;
     if (file) {
-        const image = url + req.file.path.replace(/\\/g, '/');
-        article = await Article.create({ ...body, photo: image, author: username, userId: userId }).then((a) => {
+        const result = await cloudinary.uploader.upload(req.file.path);
+
+        article = await Article.create({
+            ...body, photo: result.secure_url, cloudinary_id: result.public_id,
+            author: username, userId: userId
+        }).then((a) => {
             return a;
         });
     } else {
@@ -156,11 +159,11 @@ async function editbyId(req, res) {
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     body.updatedAt = Date.now();
-    const url = req.protocol + "://" + req.get("host") + '/';
 
     if (file) {
-        const image = url + req.file.path.replace(/\\/g, '/');
-        body.photo = image;
+        const result = await cloudinary.uploader.upload(req.file.path);
+        body.photo = result.secure_url;
+        body.cloudinary_id = result.public_id;
         return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
             if (err) {
                 res.send(err);
@@ -188,7 +191,7 @@ async function deletbyId(req, res) {
     if ((getUser._id).toString() != (article.userId).toString())
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    deleteImageByArticleID(id);
+    await cloudinary.uploader.destroy(article.cloudinary_id);
     await Article.findByIdAndDelete(id).exec();
     await User.updateOne({ username: user.username }, { $pull: { articles: id } },
         function (err, result) {
@@ -197,20 +200,7 @@ async function deletbyId(req, res) {
             }
         });
 }
-async function deleteImageByArticleID(id) {
-    const { photo } = await Article.findById(id).exec();
 
-    const imgPath = photo.split("/");
-    const [, , , folder, imageName] = imgPath;
-    const path = folder + "/" + imageName;
-
-    try {
-        fs.unlinkSync(path);
-        //file removed
-    } catch (err) {
-        console.error(err);
-    }
-}
 
 async function searchBy(req, res) {
     const { user } = req;
@@ -248,7 +238,7 @@ async function doLike(req, res) {
     const { params: { id } } = req;
     const getUser = await User.findById(user._id).exec();
     const userId = getUser._id;
-    const article =await Article.findById(id).exec();
+    const article = await Article.findById(id).exec();
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)
@@ -293,7 +283,7 @@ async function comment(req, res) {
     const { body: { comment } } = req;
     const userId = user._id;
     const getUser = await User.findById(userId).exec();
-    const article =await Article.findById(id).exec();
+    const article = await Article.findById(id).exec();
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)

@@ -37,6 +37,9 @@ const UserModel = new Schema({
     profilePhoto: {
         type: String
     },
+    cloudinary_id: {
+        type: String
+    },
     following: [String],
     follower: [String],
     articles: [String],

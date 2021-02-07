@@ -1,8 +1,8 @@
-require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../helper/db');
 const User = db.User;
+const cloudinary = require("../helper/cloudinary");
 
 async function login(req, res) {
     const { username, password } = req.body;
@@ -99,12 +99,12 @@ async function update(req, res) {
     }
 
 
-    const url = req.protocol + "://" + req.get("host");
     if (file) {
-        const image = url + "/images/" + req.file.filename;
+        const result = await cloudinary.uploader.upload(req.file.path);
         const user = {
             ...body,
-            profilePhoto: image
+            profilePhoto: result.secure_url,
+            cloudinary_id: result.public_id
         }
         await User.updateOne({ _id: getUser._id }, user,
             function (err, result) {
@@ -216,6 +216,7 @@ async function deleteUser(req, res) {
     if (!getUser)
         return res.sendStatus(403).send("UN_AUTHENTICATED");
 
+    await cloudinary.uploader.destroy(user.cloudinary_id);
     await User.findByIdAndRemove(user._id);
     return res.sendStatus(200).json({ message: "DELETED" });
 

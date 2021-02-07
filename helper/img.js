@@ -9,15 +9,15 @@ const imageFilter = function (req, file, cb) {
   }
   cb(null, true);
 }
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'public/uploads');
-    },
-    filename: (req, file, cb) => {
-     let name=path.extname(file.originalname);
-     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads');
+  },
+  filename: (req, file, cb) => {
+    //  let name=path.extname(file.originalname);
+    //  cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    cb(null, file.originalname)
+  },
+});
 
-    },
-  });
-
-  module.exports = multer({ storage: storage, fileFilter: imageFilter }).single("image");
+module.exports = multer({ storage: storage, fileFilter: imageFilter }).single("image");

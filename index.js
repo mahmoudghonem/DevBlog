@@ -28,9 +28,6 @@ app.get((req, res, next) => {
 
 // error middleware handler
 app.use((err, req, res, next) => {
-    if (err instanceof mongoose.Error) {
-        res.status(422).json(err.message);
-    }
     if (err.code == 11000) {
         res.status(422).json({
             statusCode: 'validatorError', property: err.keyValue,

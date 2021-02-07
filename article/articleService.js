@@ -1,19 +1,20 @@
 const db = require('../helper/db');
 const Article = db.Article;
 const User = db.User;
+const fs = require("fs");
 
 async function create(req, res) {
     const { body, user, file } = req;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     const username = getUser.username;
     const userId = getUser._id;
-
+    const url = req.protocol + "://" + req.get("host") + '/';
     let article;
     if (file) {
-        const image = req.file.path.replace(/\\/g, '/');
+        const image = url + req.file.path.replace(/\\/g, '/');
         article = await Article.create({ ...body, photo: image, author: username, userId: userId }).then((a) => {
             return a;
         });
@@ -34,7 +35,7 @@ async function create(req, res) {
 }
 
 async function getAll(req, res) {
-    return await Article.find().sort({ createdAt: -1 });
+    return await Article.find().sort({ createdAt: -1 }).exec();
 }
 async function getBlogs(req, res) {
     const { limit } = req.query;
@@ -57,7 +58,7 @@ async function getBlogs(req, res) {
 async function getFollowArticles(req, res) {
     const { user } = req;
     const followingUID = user.following;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
@@ -81,7 +82,7 @@ async function getFollowArticles(req, res) {
 }
 async function getMyArticles(req, res) {
     const { user } = req;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
@@ -91,11 +92,11 @@ async function getMyArticles(req, res) {
 async function saveArticle(req, res) {
     const { user } = req;
     const { id } = req.params;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    const article = await Article.findById(id);
+    const article = await Article.findById(id).exec();
     await User.updateOne({ username: getUser.username }, { $addToSet: { savearticles: article._id } },
         function (err, result) {
             if (err) {
@@ -106,11 +107,11 @@ async function saveArticle(req, res) {
 async function removeSavedArticle(req, res) {
     const { user } = req;
     const { id } = req.params;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    const article = await Article.findById(id);
+    const article = await Article.findById(id).exec();
     await User.updateOne({ username: getUser.username }, { $pull: { savearticles: article._id } },
         function (err, result) {
             if (err) {
@@ -121,7 +122,7 @@ async function removeSavedArticle(req, res) {
 async function getSavedArticles(req, res) {
     const { user } = req;
     const savedUID = user.savearticles;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
@@ -142,7 +143,7 @@ async function getById(req, res) {
 
 }
 async function editbyId(req, res) {
-    const { body, user } = req;
+    const { body, user, file } = req;
     const { id } = req.params;
     const getUser = await User.findById(user._id).exec();
     const article = await Article.findById(id).exec();
@@ -155,11 +156,10 @@ async function editbyId(req, res) {
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     body.updatedAt = Date.now();
+    const url = req.protocol + "://" + req.get("host") + '/';
 
-    const file = req.filename | false;
-    const url = req.protocol + "://" + req.get("host");
     if (file) {
-        const image = url + "/images/" + req.file.filename;
+        const image = url + req.file.path.replace(/\\/g, '/');
         body.photo = image;
         return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
             if (err) {
@@ -178,8 +178,9 @@ async function editbyId(req, res) {
 async function deletbyId(req, res) {
     const { params: { id } } = req;
     const { user } = req;
-    const getUser = await User.findById(user._id);
-    const article = Article.findById(id);
+    const getUser = await User.findById(user._id).exec();
+    const article = await Article.findById(id).exec();
+
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)
@@ -187,21 +188,34 @@ async function deletbyId(req, res) {
     if ((getUser._id).toString() != (article.userId).toString())
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
+    deleteImageByArticleID(id);
     await Article.findByIdAndDelete(id).exec();
     await User.updateOne({ username: user.username }, { $pull: { articles: id } },
         function (err, result) {
             if (err) {
                 res.send(err);
             }
-            return res.send(result);
-
         });
+}
+async function deleteImageByArticleID(id) {
+    const { photo } = await Article.findById(id).exec();
+
+    const imgPath = photo.split("/");
+    const [, , , folder, imageName] = imgPath;
+    const path = folder + "/" + imageName;
+
+    try {
+        fs.unlinkSync(path);
+        //file removed
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function searchBy(req, res) {
     const { user } = req;
     const { title, author, tags, page, limit } = req.query;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
@@ -232,9 +246,9 @@ async function searchBy(req, res) {
 async function doLike(req, res) {
     const { user } = req;
     const { params: { id } } = req;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     const userId = getUser._id;
-    const article = Article.findById(id);
+    const article =await Article.findById(id).exec();
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)
@@ -250,9 +264,9 @@ async function doLike(req, res) {
 async function unLike(req, res) {
     const { user } = req;
     const { params: { id } } = req;
-    const getUser = await User.findById(user._id);
+    const getUser = await User.findById(user._id).exec();
     const userId = getUser._id;
-    const article = Article.findById(id);
+    const article = await Article.findById(id).exec();
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)
@@ -267,7 +281,7 @@ async function unLike(req, res) {
 }
 async function likesCount(req, res) {
     const { params: { id } } = req;
-    const article = await Article.findById(id);
+    const article = await Article.findById(id).exec();
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     const likes = article.likes;
@@ -278,8 +292,8 @@ async function comment(req, res) {
     const { params: { id } } = req;
     const { body: { comment } } = req;
     const userId = user._id;
-    const getUser = await User.findById(userId);
-    const article = Article.findById(id);
+    const getUser = await User.findById(userId).exec();
+    const article =await Article.findById(id).exec();
     if (!article)
         return res.sendStatus(404).send("NOT_FOUND")
     if (!getUser)

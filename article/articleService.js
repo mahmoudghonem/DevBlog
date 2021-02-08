@@ -11,18 +11,18 @@ async function create(req, res) {
 
     const username = getUser.username;
     const userId = getUser._id;
+    let tags = body.tags.split(' ');
     let article;
     if (file) {
         const result = await cloudinary.uploader.upload(req.file.path);
-
         article = await Article.create({
-            ...body, photo: result.secure_url, cloudinary_id: result.public_id,
+            ...body, tags: tags, photo: result.secure_url, cloudinary_id: result.public_id,
             author: username, userId: userId
         }).then((a) => {
             return a;
         });
     } else {
-        article = await Article.create({ ...body, author: username, userId: userId }).then((a) => {
+        article = await Article.create({ ...body, tags: tags, author: username, userId: userId }).then((a) => {
             return a;
         });
     }

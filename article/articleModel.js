@@ -27,7 +27,7 @@ const ArticleModel = new Schema({
     },
     likes: [String],
     comments: [{
-        commentId: {
+        userId: {
             type: Schema.Types.ObjectId,
             ref: 'users'
         },

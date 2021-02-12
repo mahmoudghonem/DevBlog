@@ -36,7 +36,7 @@ const ArticleModel = new Schema({
         },
         comment: {
             type: String,
-            maxlength: 240,
+            maxlength: 1024,
             required: true
         },
         createdAt: {

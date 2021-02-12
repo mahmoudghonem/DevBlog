@@ -13,6 +13,7 @@ router.get('/:id', getById);
 router.get('/following/:id', jwtAuth, getFollowing);
 router.get('/followers/:id', jwtAuth, getFollowers);
 router.get('/usersugg/', jwtAuth, getUsersSuggestions);
+router.get('/followingCheck/:id', jwtAuth, getFollowingCheck);
 router.patch('/follow/:id', jwtAuth, follow);
 router.patch('/unfollow/:id', jwtAuth, unFollow);
 router.patch('/update/', jwtAuth, imageFile.single('image'), update);
@@ -81,6 +82,11 @@ function getFollowing(req, res, next) {
 }
 function getUsersSuggestions(req, res, next) {
     userService.getUsersSuggestions(req, res)
+        .then((e) => res.json(e))
+        .catch(err => next(err));
+}
+function getFollowingCheck(req, res, next) {
+    userService.getFollowingCheck(req, res)
         .then((e) => res.json(e))
         .catch(err => next(err));
 }

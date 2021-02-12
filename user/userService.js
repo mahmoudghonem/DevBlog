@@ -201,12 +201,11 @@ async function getFollowing(req, res) {
 }
 async function getUsersSuggestions(req, res) {
     const { user } = req;
-    const { params: { id } } = req;
     const getUser = await User.findById(user._id);
     if (!getUser)
         return res.sendStatus(403).send("UN_AUTHENTICATED");
 
-    const { following } = await getById(id)
+    const { following } = await getById(getUser._id)
     return await User.find({ '_id': { $nin: following } }).exec();
 }
 async function deleteUser(req, res) {
@@ -221,6 +220,21 @@ async function deleteUser(req, res) {
     return res.sendStatus(200).json({ message: "DELETED" });
 
 }
+async function getFollowingCheck(req, res) {
+    const { user } = req;
+    const { params: { id } } = req;
+    const followingUID = user.following;
+    const getUser = await User.findById(user._id).exec();
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    if (followingUID.includes(id)) {
+        return true;
+    }
+    return false;
+
+}
+
 async function logout(res, req) {
     const { user } = req;
     const getUser = await User.findById(user._id);
@@ -245,4 +259,5 @@ module.exports = {
     unFollow,
     checkEmail,
     checkUsername,
+    getFollowingCheck
 };

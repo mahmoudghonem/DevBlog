@@ -31,31 +31,18 @@ const ArticleModel = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'users'
         },
+        author: {
+            type: String
+        },
         comment: {
             type: String,
-            maxlength: 500,
+            maxlength: 240,
             required: true
         },
         createdAt: {
             type: Date,
             default: Date.now
         },
-        replay: [{
-            replayId: {
-                type: Schema.Types.ObjectId,
-                ref: 'users'
-            },
-            replay: {
-                type: String,
-                maxlength: 500,
-                required: true
-            },
-            createdAt: {
-                type: Date,
-                default: Date.now
-            },
-        }],
-
     }],
     reads: {
         type: Number,

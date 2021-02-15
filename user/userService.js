@@ -133,21 +133,22 @@ async function follow(req, res) {
     if (!followUser)
         return res.sendStatus(404).send("NOT_FOUND");
 
-    await User.findByIdAndUpdate(getUser._id, { $addToSet: { following: followUser._id } },
-        function (err, result) {
-            if (err) {
-                res.send(err);
-            } 
-        });
-    await User.findByIdAndUpdate(followUser._id, { $addToSet: { follower: getUser._id } },
+    await User.updateOne({ _id: getUser._id }, { $addToSet: { following: followUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
             }
         });
-    return res.sendStatus(200).json({ message: "FOLLOW" });
+    await User.updateOne({ _id: followUser._id }, { $addToSet: { follower: getUser._id } },
+        function (err, result) {
+            if (err) {
+                res.send(err);
+            }
+        });
+    return { message: "FOLLOW" };
 }
 async function unFollow(req, res) {
+
     const { user } = req;
     const { params: { id } } = req;
     const getUser = await User.findById(user._id).exec();
@@ -157,19 +158,20 @@ async function unFollow(req, res) {
     if (!followUser)
         return res.sendStatus(404).send("NOT_FOUND");
 
-    await User.findByIdAndUpdate(getUser._id, { $pull: { following: followUser._id } },
+    await User.updateOne({ _id: getUser._id }, { $pull: { following: id } },
         function (err, result) {
             if (err) {
                 res.send(err);
             }
         });
-    await User.findByIdAndUpdate(followUser._id, { $pull: { follower: getUser._id } },
+    await User.updateOne({ _id: id }, { $pull: { follower: getUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } 
+            }
         });
-    return res.sendStatus(200).json({ message: "UNFOLLOW" });
+
+    return { message: 'UNFOLLOWED' };
 }
 async function getFollowers(req, res) {
     const { user } = req;

@@ -296,6 +296,22 @@ async function comment(req, res) {
             }
         });
 }
+
+async function deleteComment(req, res) {
+    const { user } = req;
+    const { id, commentid } = req.params;
+    const getUser = await User.findById(user._id).exec();
+    if (!getUser)
+        return res.sendStatus(401).send("UN_AUTHENTICATED");
+
+    await Article.findByIdAndUpdate(id, { $pull: { comments: { _id: commentid } } },
+        function (err, result) {
+            if (err) {
+                res.send(err);
+            }
+        });
+}
+
 module.exports = {
     create,
     getAll,
@@ -312,5 +328,6 @@ module.exports = {
     saveArticle,
     removeSavedArticle,
     getFollowArticles,
-    getMyArticles
+    getMyArticles,
+    deleteComment
 }

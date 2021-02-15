@@ -21,6 +21,7 @@ router.patch('/update/:id', jwtAuth,  imageFile.single('image'), update);
 router.patch('/like/:id', jwtAuth, like);
 router.patch('/dislike/:id', jwtAuth, dislike);
 router.patch('/comment/:id', jwtAuth, comment);
+router.delete('/:id/comment/:commentid', jwtAuth, deleteComment);
 router.patch('/saveArticle/:id', jwtAuth, saveArticle);
 router.patch('/removeSavedArticle/:id', jwtAuth, removeSavedArticle);
 router.delete('/delete/:id', jwtAuth, removeArticle);
@@ -82,6 +83,11 @@ function dislike(req, res, next) {
 function comment(req, res, next) {
     articleService.comment(req, res)
         .then((e) => res.json({ message: "COMMENTED" }))
+        .catch(err => next(err));
+}
+function deleteComment(req, res, next) {
+    articleService.deleteComment(req, res)
+        .then((e) => res.json({ message: "DELETED" }))
         .catch(err => next(err));
 }
 // function getArticleComments(req, res, next) {

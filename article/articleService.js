@@ -262,7 +262,7 @@ async function unLike(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    return await Article.updateOne({ _id: id }, { $pull: { likes: userId } },
+    return await Article.findByIdAndUpdate(id , { $pull: { likes: userId } },
         function (err, result) {
             if (err) {
                 res.send(err);

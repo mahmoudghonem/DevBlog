@@ -137,16 +137,12 @@ async function follow(req, res) {
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
-            }
+            } 
         });
     await User.findByIdAndUpdate(followUser._id, { $addToSet: { follower: getUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
         });
     return res.sendStatus(200).json({ message: "FOLLOW" });
@@ -165,17 +161,13 @@ async function unFollow(req, res) {
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
             }
         });
     await User.findByIdAndUpdate(followUser._id, { $pull: { follower: getUser._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
-            } else {
-                res.send(result);
-            }
+            } 
         });
     return res.sendStatus(200).json({ message: "UNFOLLOW" });
 }

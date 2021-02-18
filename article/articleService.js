@@ -209,12 +209,11 @@ async function searchBy(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-
-    const options = {
-        page: page || 1,
-        limit: limit || 10,
-        sort: { createdAt: -1 }
-    }
+    // const options = {
+    //     page: page || 1,
+    //     limit: limit || 10,
+    //     sort: { createdAt: -1 }
+    // }
     let query = {};
 
     if (title) {
@@ -226,7 +225,14 @@ async function searchBy(req, res) {
     } else if (tags) {
         query = { 'tags': tags }
     }
-    return await Article.paginate(query, options).then((result) => {
+    // return await Article.paginate(query, options).then((result) => {
+    //     return result;
+    // }).catch((err) => {
+    //     if (err) {
+    //         return res.send(err);
+    //     }
+    // });
+    return await Article.find(query).then((result) => {
         return result;
     }).catch((err) => {
         if (err) {

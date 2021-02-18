@@ -209,12 +209,14 @@ async function searchBy(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
+
     const options = {
         page: page || 1,
         limit: limit || 10,
         sort: { createdAt: -1 }
     }
-    const query = {};
+    let query = {};
+
     if (title) {
         query = { 'title': { "$regex": title } };
 

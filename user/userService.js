@@ -145,7 +145,7 @@ async function follow(req, res) {
                 res.send(err);
             }
         });
-    return { message: "FOLLOW" };
+    return { message: "FOLLOWED" };
 }
 async function unFollow(req, res) {
 

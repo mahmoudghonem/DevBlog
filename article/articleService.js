@@ -191,9 +191,11 @@ async function deletbyId(req, res) {
     if ((getUser._id).toString() != (article.userId).toString())
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
+    if(article.cloudinary_id)
     await cloudinary.uploader.destroy(article.cloudinary_id);
+
     await Article.findByIdAndDelete(id).exec();
-    await User.updateOne({ username: user.username }, { $pull: { articles: id } },
+    await User.updateOne({ _id: user._id }, { $pull: { articles: id } },
         function (err, result) {
             if (err) {
                 res.send(err);

@@ -27,7 +27,7 @@ async function create(req, res) {
         });
     }
 
-    await User.updateOne({ username: getUser.username }, { $addToSet: { articles: article._id } },
+    await User.updateOne({ _id: getUser._id }, { $addToSet: { articles: article._id } },
         function (err, result) {
             if (err) {
                 res.send(err);
@@ -159,12 +159,13 @@ async function editbyId(req, res) {
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
     body.updatedAt = Date.now();
+    let tags = body.tags.split(' ');
 
     if (file) {
         const result = await cloudinary.uploader.upload(req.file.path);
         body.photo = result.secure_url;
         body.cloudinary_id = result.public_id;
-        return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
+        return await Article.findByIdAndUpdate({ _id: id }, { ...body, tags: tags }, { new: true }, (err, doc) => {
             if (err) {
                 res.send(err);
             }
@@ -191,8 +192,8 @@ async function deletbyId(req, res) {
     if ((getUser._id).toString() != (article.userId).toString())
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    if(article.cloudinary_id)
-    await cloudinary.uploader.destroy(article.cloudinary_id);
+    if (article.cloudinary_id)
+        await cloudinary.uploader.destroy(article.cloudinary_id);
 
     await Article.findByIdAndDelete(id).exec();
     await User.updateOne({ _id: user._id }, { $pull: { articles: id } },
@@ -272,7 +273,7 @@ async function unLike(req, res) {
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
-    return await Article.findByIdAndUpdate(id , { $pull: { likes: userId } },
+    return await Article.findByIdAndUpdate(id, { $pull: { likes: userId } },
         function (err, result) {
             if (err) {
                 res.send(err);

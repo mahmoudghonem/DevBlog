@@ -160,12 +160,12 @@ async function editbyId(req, res) {
 
     body.updatedAt = Date.now();
     let tags = body.tags.split(' ');
-
+    body.tags = tags;
     if (file) {
         const result = await cloudinary.uploader.upload(req.file.path);
         body.photo = result.secure_url;
         body.cloudinary_id = result.public_id;
-        return await Article.findByIdAndUpdate({ _id: id }, { ...body, tags: tags }, { new: true }, (err, doc) => {
+        return await Article.findByIdAndUpdate({ _id: id }, body, { new: true }, (err, doc) => {
             if (err) {
                 res.send(err);
             }

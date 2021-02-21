@@ -25,6 +25,11 @@ const UserModel = new Schema({
         unique: true,
         required: true
     },
+    bio:{
+        type: String,
+        default:'This is my bio',
+        maxLength: 240,
+    },
     password: {
         type: String,
         required: true,

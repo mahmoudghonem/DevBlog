@@ -25,9 +25,9 @@ const UserModel = new Schema({
         unique: true,
         required: true
     },
-    bio:{
+    bio: {
         type: String,
-        default:'This is my bio',
+        default: 'This is my bio',
         maxLength: 240,
     },
     password: {
@@ -45,10 +45,22 @@ const UserModel = new Schema({
     cloudinary_id: {
         type: String
     },
-    following: [String],
-    follower: [String],
-    articles: [String],
-    savearticles: [String]
+    following: [{
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+    }],
+    follower: [{
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+    }],
+    articles: [{
+        type: Schema.Types.ObjectId,
+        ref: 'articles',
+    }],
+    savearticles: [{
+        type: Schema.Types.ObjectId,
+        ref: 'articles',
+    }]
 }, {
     toJSON: {
         virtuals: true,

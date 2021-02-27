@@ -8,7 +8,7 @@ const imageFile = require("../helper/img");
 // routes
 router.get('/', getAll);
 router.get('/getBlogs', getBlogs);
-router.get('/myarticles', jwtAuth, getMyArticles);
+router.get('/myarticles/:id', jwtAuth, getMyArticles);
 router.get('/followArticles', jwtAuth, getFollowingArticles);
 router.get('/savedArticles', jwtAuth, getSavedArticles);
 router.get('/search/', jwtAuth, searchBy);

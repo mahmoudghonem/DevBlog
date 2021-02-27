@@ -40,6 +40,7 @@ async function create(req, res) {
 async function getAll(req, res) {
     return await Article.find().sort({ createdAt: -1 }).exec();
 }
+
 async function getBlogs(req, res) {
     const { limit } = req.query;
     const { page } = req.query;
@@ -84,8 +85,8 @@ async function getFollowArticles(req, res) {
     // return await Article.find({ 'userId': followingUID }).exec();
 }
 async function getMyArticles(req, res) {
-    const { user } = req;
-    const getUser = await User.findById(user._id).exec();
+    const { id } = req.params;
+    const getUser = await User.findById(id).exec();
     if (!getUser)
         return res.sendStatus(401).send("UN_AUTHENTICATED");
 
